@@ -1,0 +1,433 @@
+// David Whipple
+// 12/7/2015
+// CS680 Final Project
+//
+//
+// constants won't change :
+const long interval = 1000;           // interval at which to blink (milliseconds)
+const int BLUEPIN=13;
+const int WHITEPIN=12;
+const int REDPIN=11;
+const int PURPLEPIN=10;
+const int PURPLEBUTTON=2;
+const int REDBUTTON=3;
+const int WHITEBUTTON=4;
+const int BLUEBUTTON=5;
+byte leds[] = { BLUEPIN, WHITEPIN, REDPIN, PURPLEPIN };
+byte buttons[] = { BLUEBUTTON, WHITEBUTTON, REDBUTTON, PURPLEBUTTON };
+
+int movesToWin = 20;
+
+// Stuff for the state machine
+const int idleState = 1;
+const int playState = 2;
+const int waitingState = 3;
+const int winnerState = 4;
+byte stateMachine[] = {idleState, playState, waitingState, winnerState };
+int currentState = idleState;
+
+const int ledsQty = sizeof(leds);
+const int buttonsQty = sizeof(buttons);
+int listOfMoves[100];
+int lastMove=0;
+int moveNumber=1;
+
+void myReset() {
+     digitalWrite(BLUEPIN, LOW);
+     digitalWrite(WHITEPIN, LOW);
+     digitalWrite(REDPIN, LOW);
+     digitalWrite(PURPLEPIN, LOW);       
+}
+void playAllMoves() {
+
+  int move;
+  int i=0;
+
+  while (i<lastMove) {
+  
+      move=listOfMoves[i++]=move;
+  
+      switch (move) {
+        case 1:   digitalWrite(BLUEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(BLUEPIN, LOW);
+                  break;
+        case 2:   digitalWrite(WHITEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(WHITEPIN, LOW);
+                  break;
+        case 3:   digitalWrite(REDPIN, HIGH);
+                  delay(500);
+                  digitalWrite(REDPIN, LOW);
+                  break;
+        case 4:   digitalWrite(PURPLEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(PURPLEPIN, LOW);
+                  break;
+      }  
+  }
+}
+void makeMove() {
+
+  int move;
+  
+  move=random(1,5);
+  listOfMoves[lastMove]=move;
+  lastMove++;
+
+  switch (move) {
+    case 1:   digitalWrite(BLUEPIN, HIGH);
+              delay(500);
+              digitalWrite(BLUEPIN, LOW);
+              break;
+    case 2:   digitalWrite(WHITEPIN, HIGH);
+              delay(500);
+              digitalWrite(WHITEPIN, LOW);
+              break;
+    case 3:   digitalWrite(REDPIN, HIGH);
+              delay(500);
+              digitalWrite(REDPIN, LOW);
+              break;
+    case 4:   digitalWrite(PURPLEPIN, HIGH);
+              delay(500);
+              digitalWrite(PURPLEPIN, LOW);
+              break;
+  }
+  
+}
+
+void fail() {
+
+  // Light all 4 lights and wait 5 seconds..
+  digitalWrite(BLUEPIN, HIGH);
+  digitalWrite(WHITEPIN, HIGH);
+  digitalWrite(REDPIN, HIGH);
+  digitalWrite(PURPLEPIN, HIGH);
+  delay(5*interval);
+  digitalWrite(BLUEPIN, LOW);
+  digitalWrite(WHITEPIN, LOW);
+  digitalWrite(REDPIN, LOW);
+  digitalWrite(PURPLEPIN, LOW);
+      
+}
+void myStartup(){
+
+    int waitTime=500;
+    
+    Serial.println("Entering myStartup()");
+
+    for (int i=0;i<=2;i++) {
+        digitalWrite(BLUEPIN, HIGH);
+        digitalWrite(WHITEPIN, HIGH);
+        digitalWrite(REDPIN, HIGH);
+        digitalWrite(PURPLEPIN, HIGH);
+        delay(waitTime);
+        digitalWrite(BLUEPIN, LOW);
+        digitalWrite(WHITEPIN, LOW);
+        digitalWrite(REDPIN, LOW);
+        digitalWrite(PURPLEPIN, LOW);
+        delay(waitTime);
+    }
+}
+
+
+int watchButtons()
+{
+  int buttonStatePurple = 0;         // variable for reading the pushbutton status
+  int buttonStateRed = 0;         // variable for reading the pushbutton status
+  int buttonStateWhite = 0;         // variable for reading the pushbutton status
+  int buttonStateBlue = 0;         // variable for reading the pushbutton status
+
+  // Serial.println("Entering watchButtons()");
+      
+  buttonStatePurple = digitalRead(PURPLEBUTTON);
+  
+  // check if the pushbutton is pressed.
+  // if it is, the buttonState is HIGH:
+  if (buttonStatePurple == HIGH) {
+    // turn LED on:
+    digitalWrite(PURPLEPIN, HIGH);
+    delay(200);
+    digitalWrite(PURPLEPIN, LOW);
+    Serial.println("Purple Pushed, returning 10");
+    return 10;
+  } else {
+    // turn LED off:
+    digitalWrite(PURPLEPIN, LOW);
+  }
+  buttonStateRed = digitalRead(REDBUTTON);
+  if (buttonStateRed == HIGH) {
+    // turn LED on:
+    digitalWrite(REDPIN, HIGH);
+    delay(200);
+    digitalWrite(REDPIN, LOW);
+    Serial.println("Red Pushed, returning 11");
+    return 11;
+  } else {
+    // turn LED off:
+    digitalWrite(REDPIN, LOW);
+  }
+  buttonStateWhite = digitalRead(WHITEBUTTON);
+  if (buttonStateWhite == HIGH) {
+    // turn LED on:
+    digitalWrite(WHITEPIN, HIGH);
+    delay(200);
+    digitalWrite(WHITEPIN, LOW);
+    Serial.println("White Pushed, returning 12");
+    return 12;
+  } else {
+    // turn LED off:
+    digitalWrite(WHITEPIN, LOW);
+  }
+  buttonStateBlue = digitalRead(BLUEBUTTON);
+  if (buttonStateBlue == HIGH) {
+    // turn LED on:
+    digitalWrite(BLUEPIN, HIGH);
+    delay(200);
+    digitalWrite(BLUEPIN, LOW);
+    Serial.println("Blue Pushed, returning 13");
+    return 13;
+  } else {
+    // turn LED off:
+    digitalWrite(BLUEPIN, LOW);
+  }
+  //Serial.println("Nothing pushed, returning 0");
+  return 0;
+}
+
+void newGame() {
+
+  // Create new game
+  int move;
+  int numMoves=100;
+
+  Serial.print("Entering newgame(), initializing ");
+  Serial.println(numMoves);
+  //Serial.println(" moves.");
+  //Serial.print("[");
+  
+  for (int i=0;i<numMoves;i++) {
+    move=random(10,14);
+    listOfMoves[lastMove]=move;
+    //Serial.print(move);
+    //Serial.print("-");
+    lastMove++;
+  }
+  //Serial.println("]");
+}
+
+void watchGame() {
+
+  // Replay a game
+  int i=0, move;
+  while (i<100)  {
+    move=listOfMoves[i++];
+    switch (move) {
+        case 10:   digitalWrite(BLUEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(BLUEPIN, LOW);
+                  break;
+        case 11:   digitalWrite(WHITEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(WHITEPIN, LOW);
+                  break;
+        case 12:   digitalWrite(REDPIN, HIGH);
+                  delay(500);
+                  digitalWrite(REDPIN, LOW);
+                  break;
+        case 13:   digitalWrite(PURPLEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(PURPLEPIN, LOW);
+                  break;
+      }
+   }  
+}
+
+void halt(){
+  Serial.println("Entering halt()");
+  myReset();
+  while(true) {
+  }
+}
+
+void right()
+{
+   Serial.println("Entering right()");
+   for (int led=ledsQty-1;led>=0;led--) {
+     Serial.print("Turning on ");
+     Serial.println(leds[led]);
+     ledOn(leds[led]);
+     delay(75);
+     ledOff(leds[led]);
+   }
+}
+
+void ledOn(int led)
+{
+  digitalWrite(led, HIGH);
+}
+
+void ledOff(int led)
+{
+  digitalWrite(led, LOW);
+}
+
+void left()
+{
+   Serial.println("Entering left()");
+   for (int led=0;led<ledsQty;led++) {
+     Serial.print("Turning on ");
+     Serial.println(leds[led]);
+     ledOn(leds[led]);
+     delay(75);
+     ledOff(leds[led]);
+   }
+}
+
+void winner() 
+{
+  for (int i=0;i<50;i++) {
+      left();
+      right(); 
+  }
+}
+
+void loser() {
+
+  int delay1=20;
+  int delay2=50;
+  Serial.println("Entering winner()");
+  for (int i=0;i<=50;i++) {
+     digitalWrite(BLUEPIN, HIGH);
+     digitalWrite(WHITEPIN, HIGH);
+     digitalWrite(REDPIN, HIGH); 
+     digitalWrite(PURPLEPIN, HIGH);
+     delay(delay1);
+     digitalWrite(WHITEPIN, LOW);
+     digitalWrite(BLUEPIN, LOW);
+     digitalWrite(REDPIN, LOW); 
+     digitalWrite(PURPLEPIN, LOW);
+     delay(delay2);  
+  }
+}
+void setup() {
+  
+    Serial.begin(9600);
+    Serial.println("Starting setup()");
+  // put your setup code here, to run once:
+    pinMode(BLUEPIN, OUTPUT);
+    pinMode(WHITEPIN, OUTPUT);
+    pinMode(REDPIN, OUTPUT);
+    pinMode(PURPLEPIN, OUTPUT);
+
+  myStartup();
+  newGame();
+   
+  // initialize the pushbutton pin as an input:
+  pinMode(PURPLEBUTTON, INPUT);
+
+}
+
+void replaySequence() {
+  // Replay a game
+  int i=0, move;
+  while (i<moveNumber) {
+    move=listOfMoves[i++];
+    switch (move) {
+        case 10:   digitalWrite(BLUEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(BLUEPIN, LOW);
+                  break;
+        case 11:   digitalWrite(WHITEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(WHITEPIN, LOW);
+                  break;
+        case 12:   digitalWrite(REDPIN, HIGH);
+                  delay(500);
+                  digitalWrite(REDPIN, LOW);
+                  break;
+        case 13:   digitalWrite(PURPLEPIN, HIGH);
+                  delay(500);
+                  digitalWrite(PURPLEPIN, LOW);
+                  break;
+      }
+   }    
+}
+
+void loop() {
+
+   int button=0;
+
+   if (currentState == idleState) {
+
+      // Waiting for any button to be pressed to start the game.
+    
+      Serial.print("In IDLE state, waiting for start");
+      //Serial.println(moveNumber);
+      while (button==0) {
+        button = watchButtons();
+      }
+      Serial.print("Button pressed, Button is ");
+      Serial.println(button);
+
+      currentState=playState;
+      delay(500);
+   }
+
+   if (currentState == playState) {
+    
+      Serial.print("In PLAY state, move number is ");
+      Serial.println(moveNumber);
+      
+      // Play the moves
+      for (int i=1;i<=moveNumber;i++) {
+         Serial.print("Move is ");
+         Serial.println(listOfMoves[i]);
+         ledOn(listOfMoves[i]);
+         delay(500);
+         ledOff(listOfMoves[i]);
+         delay(500);
+      }
+
+      moveNumber++;
+      currentState = waitingState;
+      
+   }
+   
+   if (currentState == waitingState) {
+
+      for (int i=1;i<moveNumber;i++) {
+          button=0;
+          Serial.print("In WAITING state..");
+          //Serial.println(moveNumber);
+          while (button==0) {
+            button = watchButtons();
+          }
+          Serial.print("Button pressed, Button is ");
+          Serial.println(button);
+
+          if (button != listOfMoves[i]) 
+          {
+              loser(); // Really loser
+              currentState = idleState;
+              i=moveNumber; // Very hacky, yuck
+              moveNumber=1;
+          }
+          delay(100);
+      }
+      if (currentState != idleState) {
+         currentState = playState;
+      }
+      delay(500);
+   }
+   
+   if (moveNumber == movesToWin) {
+      currentState = winnerState;
+   }
+   
+   if (currentState == winnerState) {
+       Serial.print("You WON!!  You guessed 20 moves..");
+       winner();
+       currentState = idleState;
+   }
+}
